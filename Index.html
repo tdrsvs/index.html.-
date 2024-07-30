@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الكُل في واحد</title>
+    <link href="https://vjs.zencdn.net/7.18.1/video-js.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-MItAIG+97utuKxU7zB1A2uOltMCyQ05WdHQxh/Rn6aEh8sSvV8j3R5q+OHoUZ4BlCv1yR44JprL0vTlHdXsWGw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000;
+            margin: 0;
+        }
+        .video-js {
+            width: 100%;
+            height: 100%;
+        }
+        .vjs-quality-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .vjs-quality-menu {
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            z-index: 1001;
+            max-width: 300px;
+            overflow-y: auto;
+            color: #fff;
+        }
+        .vjs-quality-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .vjs-quality-menu ul li {
+            cursor: pointer;
+            padding: 2.2px;
+            text-align: center;
+        }
+        .vjs-quality-menu ul li:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .hidden-qualities {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <video id="my-video" class="video-js vjs-default-skin" controls preload="auto"
+        poster="your-poster-image.jpg" data-setup="{}">
+        <source src="https://app.viloud.tv/hls/channel/c31de0fdc8d3c0b9dea1a58cadf2ea2b.m3u8">
+        متصفحك لا يدعم عنصر الفيديو.
+    </video>
+
+    <div class="vjs-quality-overlay" id="quality-overlay">
+        <div class="vjs-quality-menu" id="quality-menu">
+            <!-- Menu for Episode Quality -->
+            <ul id="episode-quality" class="hidden-qualities">
+                <li data-src="#">سيتم ضبط جودة العرض تلقائيا حسب مقدار الإنترنت لديك</li>
+              
+              
+              
+              
+            </ul>
+            <!-- Menu for List of Episodes -->
+            <ul id="episode-list">
+                <li data-episode="#"> قناة بين سبورت الإخبارية </li>
+               
+            </ul>
+            
+            
+            
+        </div>
+    </div>
+
+    <script src="https://vjs.zencdn.net/7.18.1/video.js"></script>
+    <script>
+        var player = videojs('my-video', {
+            controlBar: {
+                children: [
+                    'playToggle',
+                    'volumePanel',
+                    'currentTimeDisplay',
+                    'timeDivider',
+                    'durationDisplay',
+                    'progressControl',
+                    'liveDisplay',
+                    'remainingTimeDisplay',
+                    'playbackRateMenuButton',
+                    'subtitlesButton',
+                    'fullscreenToggle'
+                ]
+            }
+        });
+
+        var qualityOverlay = document.getElementById('quality-overlay');
+        var episodeQualityMenu = document.getElementById('episode-quality');
+        var episodeListMenu = document.getElementById('episode-list');
+        var hiddenQualities = document.querySelectorAll('.hidden-qualities');
+
+        // Button for Episode Quality
+        var qualityButton = document.createElement('button');
+        qualityButton.className = 'vjs-quality-control vjs-control';
+        qualityButton.innerText = 'auto';
+        qualityButton.onclick = function() {
+            episodeQualityMenu.style.display = 'block';
+            episodeListMenu.style.display = 'none';
+            qualityOverlay.style.display = 'flex';
+        };
+        player.controlBar.el().insertBefore(qualityButton, player.controlBar.getChild('fullscreenToggle').el());
+
+        // Button for Episode List
+        var listButton = document.createElement('button');
+        listButton.className = 'vjs-quality-control vjs-control';
+        listButton.innerText = ' بين سبورت    ';
+        listButton.onclick = function() {
+            episodeListMenu.style.display = 'block';
+            episodeQualityMenu.style.display = 'none';
+            qualityOverlay.style.display = 'flex';
+        };
+        player.controlBar.el().insertBefore(listButton, qualityButton.nextSibling);
+
+        // Handle click events for episode quality menu
+        episodeQualityMenu.addEventListener('click', function(event) {
+            if (event.target.tagName === 'LI') {
+                var source = event.target.getAttribute('data-src');
+                player.src({ type: "video/mp4", src: source });
+                player.load();
+                player.play();
+                qualityOverlay.style.display = 'none';
+                qualityButton.innerText = event.target.innerText;
+            }
+        });
+
+        // Handle click events for episode list menu
+        episodeListMenu.addEventListener('click', function(event) {
+            if (event.target.tagName === 'LI') {
+                var episode = event.target.getAttribute('data-episode');
+                var sources = {
+                    1: [
+                        { src: "https://app.viloud.tv/hls/channel/c31de0fdc8d3c0b9dea1a58cadf2ea2b.m3u8", quality: "1080P" },
+                        { src: "https://app.viloud.tv/hls/channel/c31de0fdc8d3c0b9dea1a58cadf2ea2b.m3u8", quality: "720P" },
+                        { src: "https://app.viloud.tv/hls/channel/c31de0fdc8d3c0b9dea1a58cadf2ea2b.m3u8", quality: "480P" },
+                        
+                       
+                       
+                   
+                    
+                    
+                    
+                    
+                    
+                    ] 
+                };
+                // Load the first quality as the default
+                player.src({ type: "video/mp4", src: sources[episode][0].src });
+                player.load();
+                player.play();
+                qualityOverlay.style.display = 'none';
+                listButton.innerText = event.target.innerText;
+                // Update quality menu
+                updateQualityMenu(sources[episode]);
+            }
+        });
+
+        // Function to update quality menu
+        function updateQualityMenu(sources) {
+            // Clear existing menu items
+            episodeQualityMenu.innerHTML = '';
+            sources.forEach(function(source) {
+                var li = document.createElement('li');
+                li.setAttribute('data-src', source.src);
+                li.innerText = source.quality;
+                episodeQualityMenu.appendChild(li);
+            });
+            episodeQualityMenu.classList.remove('hidden-qualities');
+        }
+
+        // Close overlay on outside click
+        qualityOverlay.addEventListener('click', function(event) {
+            if (event.target === qualityOverlay) {
+                qualityOverlay.style.display = 'none';
+            }
+        });
+    </script>
+        <script>
+
+      function checkInternetConnection() {
+
+    if (!navigator.onLine) {
+        document.body.classList.add('offline');
+        document.body.innerHTML = '<p> ليس لديك اتصال إنترنت</p>';
+        document.body.style.backgroundColor = 'black';
+        document.body.style.color = 'white';
+        document.body.style.display = 'flex';
+        document.body.style.justifyContent = 'center';
+        document.body.style.alignItems = 'center';
+        document.body.style.height = '100vh';
+        document.body.style.margin = '0';
+        document.body.style.fontSize = '24px';
+    }
+}
+
+window.addEventListener('online', checkInternetConnection);
+window.addEventListener('offline', checkInternetConnection);
+
+// فحص الاتصال بشكل دوري
+setInterval(checkInternetConnection, 3000);
+
+    </script>
+</body>
+</html>
